@@ -1,15 +1,11 @@
----
-title: "Assignment Reproducible Research Week 2"
-output: 
-  html_document: 
-    keep_md: yes
----
+# Assignment Reproducible Research Week 2
 
 ### Data Processing
 
 Read in data and convert dates from a character format to a date format.
 
-```{r data processing, echo=TRUE}
+
+```r
 act <- read.csv(unzip("activity.zip"))
 act$date <- as.Date(act$date)
 ```
@@ -21,19 +17,42 @@ act$date <- as.Date(act$date)
 Load the plyr package and calculate the total number of steps per day (ignoring missing values). Generate a vector of observations and display that as a histogram, showing the total number of steps taken each day.  
 Calculate the mean and median of the total number of steps taken per day.
 
-```{r DailyStepNumber, echo=TRUE}
+
+```r
 library(plyr)
 day <- ddply(act,.(date),summarize, sum=sum(steps, na.rm=T))
 day.freq = (rep(day$date, day$sum))
 
 hist(day.freq, breaks = dim(day)[1], xlab = "Day", main="Total Number of Steps per day")
+```
 
+![](PA1_claudiascheckel_files/figure-html/DailyStepNumber-1.png)<!-- -->
+
+```r
 pdf("Figures/DailyStepNumber.pdf", height=5, width=7, pointsize=12)
 hist(day.freq, breaks = dim(day)[1], xlab = "Day", main="Total Number of Steps per day")
 dev.off()
+```
 
+```
+## quartz_off_screen 
+##                 2
+```
+
+```r
 mean(day$sum)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(day$sum)
+```
+
+```
+## [1] 10395
 ```
 
 The mean of the total number of steps taken per day is 9354, the median is 10395.
@@ -43,7 +62,8 @@ The mean of the total number of steps taken per day is 9354, the median is 10395
 Calculate the mean number of steps taken across all days per interval (ignoring missing values). Assign names and means to two vectors (Interval and Steps) and combine the two vectors into a data frame. Plot Steps vs Interval with ggplot (add a blue line, white background, remove grid lines, add axes label and title).  
 Display the interval with the maximum number of steps.
 
-```{r DailyActivityPattern, echo=TRUE}
+
+```r
 Interval <- as.numeric(names(tapply(act$steps, act$interval, mean, na.rm=T)))
 Steps <- as.numeric(tapply(act$steps, act$interval, mean, na.rm=T))
 times <- as.data.frame(cbind(Interval, Steps))
@@ -54,9 +74,19 @@ ggplot(times, aes(Interval, Steps)) +
     theme_bw() +
     theme(panel.grid = element_blank()) +
     labs(x = "Interval", y = "Number of steps", title = "Average number of steps across all days")
+```
+
+![](PA1_claudiascheckel_files/figure-html/DailyActivityPattern-1.png)<!-- -->
+
+```r
 ggsave("Figures/DailyActivityPattern.pdf", width=7, height=5)
 
 times[(times$Steps==max(times$Steps)),][1]
+```
+
+```
+##     Interval
+## 104      835
 ```
 
 The 5-minute interval 835 contains the maximum number of steps.
@@ -68,10 +98,17 @@ With a for loop, replace the missing values with the mean number of steps of the
 Calculate the mean and median of the total number of steps taken per day: both increased compared to the original dataset.  
 Subtract the mean and median calculated on the original dataset from the new mean and median to get the difference.
 
-```{r DailyStepNumber_noNA, echo=TRUE}
+
+```r
 act_na <- act[(is.na(act$steps)),] 
 dim(act_na) [1]
+```
 
+```
+## [1] 2304
+```
+
+```r
 for (i in 1:length(act_na$date)) {
     x <- act_na$interval[i]
     y <- mean(act[(act$interval==x),1], na.rm=T)
@@ -82,16 +119,51 @@ day_new <- ddply(act_new,.(date),summarize, sum=sum(steps))
 day_new.freq = (rep(day_new$date, day_new$sum))
 
 hist(day_new.freq, breaks = dim(day_new)[1], xlab = "Day", main="Total Number of Steps per day - missing values filled")
+```
 
+![](PA1_claudiascheckel_files/figure-html/DailyStepNumber_noNA-1.png)<!-- -->
+
+```r
 pdf("Figures/DailyStepNumber_FilledMissingValues.pdf", height=5, width=7, pointsize=12)
 hist(day_new.freq, breaks = dim(day_new)[1], xlab = "Day", main="Total Number of Steps per day - missing values filled")
 dev.off()
+```
 
+```
+## quartz_off_screen 
+##                 2
+```
+
+```r
 mean(day_new$sum) 
-median(day_new$sum) 
+```
 
+```
+## [1] 10766.19
+```
+
+```r
+median(day_new$sum) 
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 mean(day_new$sum) - mean(day$sum)
+```
+
+```
+## [1] 1411.959
+```
+
+```r
 median(day_new$sum) - median(day$sum)
+```
+
+```
+## [1] 371.1887
 ```
 
 2304 values are missing in the dataset.  
@@ -105,7 +177,8 @@ Calculate the mean number of steps per interval across all weekend days. Assign 
 Combine the two dataframes wknd and wkd into the dataframe times_new.  
 Plot Steps vs Interval for weekends and weekdays (using facet_wrap) with ggplot (add a blue line, white background, add a yellow title background, remove grid lines, add axes labels).
 
-```{r DailyActivityPattern_Weekday, echo=TRUE}
+
+```r
 act_new$weekday <- weekdays(act$date)
 weekend <- act_new[(act_new$weekday=="Saturday")|(act_new$weekday=="Sunday"),]
 weekday <- act_new[!(rownames(act_new)%in%rownames(weekend)),]
@@ -128,8 +201,12 @@ ggplot(times_new, aes(Interval, Steps)) +
     theme(strip.background = element_rect(fill = "papayawhip"), panel.grid = element_blank()) +
     xlab("Interval") +
     ylab("Number of steps")
-ggsave("Figures/DailyActivityPattern_WeekendVsWeekday.pdf", width=7, height=8)
+```
 
+![](PA1_claudiascheckel_files/figure-html/DailyActivityPattern_Weekday-1.png)<!-- -->
+
+```r
+ggsave("Figures/DailyActivityPattern_WeekendVsWeekday.pdf", width=7, height=8)
 ```
 
 Yes - the activity pattern differs between weekend and weekdays. People seem to be overall more active on the weekend, and the curve seems to be shifted to the right (i.e. people start to be active later in the morning and stay more active later at night).
