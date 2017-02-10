@@ -14,30 +14,18 @@ act$date <- as.Date(act$date)
 
 ### What is the mean total number of steps taken per day?
 
-Load the plyr package and calculate the total number of steps per day (ignoring missing values). Generate a vector of observations and display that as a histogram, showing the total number of steps taken each day.  
+Load the plyr package and calculate the total number of steps per day (ignoring missing values). Generate a histogram, showing the total number of steps per day.  
 Calculate the mean and median of the total number of steps taken per day.
 
 
 ```r
 library(plyr)
 day <- ddply(act,.(date),summarize, sum=sum(steps, na.rm=T))
-day.freq = (rep(day$date, day$sum))
 
-hist(day.freq, breaks = dim(day)[1], xlab = "Day", main="Total Number of Steps per day")
+hist(day$sum, xlab = "Total Number of Steps", ylab="Frequency [Days]", main="Total Number of Steps per Day")
 ```
 
 ![](PA1_claudiascheckel_files/figure-html/DailyStepNumber-1.png)<!-- -->
-
-```r
-pdf("Figures/DailyStepNumber.pdf", height=5, width=7, pointsize=12)
-hist(day.freq, breaks = dim(day)[1], xlab = "Day", main="Total Number of Steps per day")
-dev.off()
-```
-
-```
-## quartz_off_screen 
-##                 2
-```
 
 ```r
 mean(day$sum)
@@ -79,8 +67,6 @@ ggplot(times, aes(Interval, Steps)) +
 ![](PA1_claudiascheckel_files/figure-html/DailyActivityPattern-1.png)<!-- -->
 
 ```r
-ggsave("Figures/DailyActivityPattern.pdf", width=7, height=5)
-
 times[(times$Steps==max(times$Steps)),][1]
 ```
 
@@ -94,7 +80,7 @@ The 5-minute interval 835 contains the maximum number of steps.
 ## Imputing missing values
 
 Select lines with missing values and display for how many entries there are missing values.  
-With a for loop, replace the missing values with the mean number of steps of the corresponding interval. Combine non-missing values and missing values (which have now been filled) into a new dataframe, act_new. Generate a vector of observations and display that as histogram, showing the total number of steps taken each day.  
+With a for loop, replace the missing values with the mean number of steps of the corresponding interval. Combine non-missing values and missing values (which have now been filled) into a new dataframe, act_new. Generate a histogram, showing the total number of steps taken per day.  
 Calculate the mean and median of the total number of steps taken per day: both increased compared to the original dataset.  
 Subtract the mean and median calculated on the original dataset from the new mean and median to get the difference.
 
@@ -116,23 +102,11 @@ for (i in 1:length(act_na$date)) {
 }
 act_new <- rbind(act_na, act[!(rownames(act)%in%rownames(act_na)),])
 day_new <- ddply(act_new,.(date),summarize, sum=sum(steps))
-day_new.freq = (rep(day_new$date, day_new$sum))
 
-hist(day_new.freq, breaks = dim(day_new)[1], xlab = "Day", main="Total Number of Steps per day - missing values filled")
+hist(day_new$sum, xlab = "Total Number of Steps", ylab="Frequency [Days]", main="Total Number of Steps per Day - missing values filled")
 ```
 
 ![](PA1_claudiascheckel_files/figure-html/DailyStepNumber_noNA-1.png)<!-- -->
-
-```r
-pdf("Figures/DailyStepNumber_FilledMissingValues.pdf", height=5, width=7, pointsize=12)
-hist(day_new.freq, breaks = dim(day_new)[1], xlab = "Day", main="Total Number of Steps per day - missing values filled")
-dev.off()
-```
-
-```
-## quartz_off_screen 
-##                 2
-```
 
 ```r
 mean(day_new$sum) 
@@ -204,9 +178,5 @@ ggplot(times_new, aes(Interval, Steps)) +
 ```
 
 ![](PA1_claudiascheckel_files/figure-html/DailyActivityPattern_Weekday-1.png)<!-- -->
-
-```r
-ggsave("Figures/DailyActivityPattern_WeekendVsWeekday.pdf", width=7, height=8)
-```
 
 Yes - the activity pattern differs between weekend and weekdays. People seem to be overall more active on the weekend, and the curve seems to be shifted to the right (i.e. people start to be active later in the morning and stay more active later at night).
